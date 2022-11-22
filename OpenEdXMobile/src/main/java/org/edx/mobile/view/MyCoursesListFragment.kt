@@ -1,5 +1,6 @@
 package org.edx.mobile.view
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
@@ -30,9 +31,11 @@ import org.edx.mobile.interfaces.RefreshListener
 import org.edx.mobile.model.api.EnrolledCoursesResponse
 import org.edx.mobile.module.analytics.Analytics
 import org.edx.mobile.module.analytics.InAppPurchasesAnalytics
+import org.edx.mobile.util.InAppPurchasesException
 import org.edx.mobile.util.NetworkUtil
 import org.edx.mobile.util.NonNullObserver
 import org.edx.mobile.util.UiUtils
+import org.edx.mobile.util.observer.EventObserver
 import org.edx.mobile.view.adapters.MyCoursesAdapter
 import org.edx.mobile.view.dialog.CourseModalDialogFragment
 import org.edx.mobile.view.dialog.FullscreenLoaderDialogFragment
@@ -42,7 +45,7 @@ import org.edx.mobile.viewModel.InAppPurchasesViewModel
 import org.edx.mobile.wrapper.InAppPurchasesDialog
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
-import java.util.*
+import java.util.Timer
 import javax.inject.Inject
 import kotlin.concurrent.schedule
 
@@ -207,25 +210,21 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
 
         iapViewModel.showFullscreenLoaderDialog.observe(
             viewLifecycleOwner,
-            NonNullObserver { canShowLoader ->
+            EventObserver { canShowLoader ->
                 if (canShowLoader) {
                     fullscreenLoader?.show(childFragmentManager, FullscreenLoaderDialogFragment.TAG)
-                    iapViewModel.showFullScreenLoader(false)
                 }
             })
 
-        iapViewModel.refreshCourseData.observe(
-            viewLifecycleOwner,
-            NonNullObserver { refreshCourse ->
-                if (refreshCourse) {
-                    refreshOnPurchase = true
-                    courseViewModel.fetchEnrolledCourses(
-                        type = CoursesRequestType.LIVE,
-                        showProgress = false
-                    )
-                    iapViewModel.refreshCourseData(false)
-                }
-            })
+        iapViewModel.refreshCourseData.observe(viewLifecycleOwner, EventObserver { refreshCourse ->
+            if (refreshCourse) {
+                refreshOnPurchase = true
+                courseViewModel.fetchEnrolledCourses(
+                    type = CoursesRequestType.LIVE,
+                    showProgress = false
+                )
+            }
+        })
 
         iapViewModel.purchaseFlowComplete.observe(
             viewLifecycleOwner,
@@ -240,20 +239,26 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
                 }
             })
 
-        iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMsg ->
+        iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMessage ->
             if (iapViewModel.upgradeMode.isNormalMode()) {
                 return@NonNullObserver
             }
+            var cancelListener: DialogInterface.OnClickListener? = null
+            if (errorMessage.isPostUpgradeErrorType().not()) {
+                cancelListener =
+                    DialogInterface.OnClickListener { _, _ -> iapViewModel.resetPurchase(true) }
+            }
             iapDialog.handleIAPException(
                 fragment = this@MyCoursesListFragment,
-                errorMessage = errorMsg,
+                errorMessage = errorMessage,
                 retryListener = { _, _ ->
-                    if (errorMsg.requestType == ErrorMessage.EXECUTE_ORDER_CODE)
+                    if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
                         iapViewModel.executeOrder(requireActivity())
-                    else
-                        iapViewModel.refreshCourseData(true)
+                    } else if (HttpStatus.NOT_ACCEPTABLE == (errorMessage.throwable as InAppPurchasesException).httpErrorCode) {
+                        iapViewModel.showFullScreenLoader(true)
+                    }
                 },
-                cancelListener = { _, _ -> resetPurchase() }
+                cancelListener = cancelListener
             )
             iapViewModel.errorMessageShown()
         })

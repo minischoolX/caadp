@@ -317,17 +317,16 @@ public class CourseOutlineFragment extends OfflineSupportBaseFragment
         iapViewModel = new ViewModelProvider(requireActivity()).get(InAppPurchasesViewModel.class);
 
         iapViewModel.getShowFullscreenLoaderDialog().observe(getViewLifecycleOwner(), canShowLoader -> {
-            if (canShowLoader) {
+            if (Boolean.TRUE.equals(canShowLoader.getContentIfNotConsumed())) {
                 fullscreenLoader.show(getChildFragmentManager(), FullscreenLoaderDialogFragment.TAG);
                 iapViewModel.showFullScreenLoader(false);
             }
         });
 
         iapViewModel.getRefreshCourseData().observe(getViewLifecycleOwner(), refreshCourse -> {
-            if (refreshCourse) {
+            if (Boolean.TRUE.equals(refreshCourse.getContentIfNotConsumed())) {
                 refreshOnPurchase = true;
                 getCourseComponentFromServer(false, true);
-                iapViewModel.refreshCourseData(false);
             }
         });
 

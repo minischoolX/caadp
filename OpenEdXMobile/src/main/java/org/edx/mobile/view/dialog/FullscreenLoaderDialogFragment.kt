@@ -83,22 +83,24 @@ class FullscreenLoaderDialogFragment : DialogFragment() {
     }
 
     private fun initObservers() {
-        iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMsg ->
-            errorMsg.throwable as InAppPurchasesException
-            iapDialog.handleIAPException(
-                fragment = this@FullscreenLoaderDialogFragment,
-                errorMessage = errorMsg,
-                retryListener = { _, _ ->
-                    if (errorMsg.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
-                        iapViewModel.executeOrder(requireActivity())
-                    } else {
-                        iapViewModel.refreshCourseData(true)
-                    }
-                },
-                cancelListener = { _, _ ->
-                    resetPurchase()
-                })
-            iapViewModel.errorMessageShown()
+        iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMessage ->
+            if (errorMessage.isPostUpgradeErrorType()) {
+                errorMessage.throwable as InAppPurchasesException
+                iapDialog.handleIAPException(
+                    fragment = this@FullscreenLoaderDialogFragment,
+                    errorMessage = errorMessage,
+                    retryListener = { _, _ ->
+                        if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
+                            iapViewModel.executeOrder(requireActivity())
+                        } else {
+                            iapViewModel.refreshCourseData(true)
+                        }
+                    },
+                    cancelListener = { _, _ ->
+                        resetPurchase()
+                    })
+                iapViewModel.errorMessageShown()
+            }
         })
     }
 

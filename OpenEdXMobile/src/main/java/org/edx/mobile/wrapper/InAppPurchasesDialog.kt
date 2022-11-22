@@ -47,7 +47,7 @@ class InAppPurchasesDialog @Inject constructor(
                         retryListener = retryListener,
                         cancelListener = cancelListener
                     )
-                } ?: showUpgradeErrorDialog(
+                } ?: showPreUpgradeErrorDialog(
                     context = fragment,
                     errorMessage = errorMessage,
                     retryListener = retryListener
@@ -71,7 +71,7 @@ class InAppPurchasesDialog @Inject constructor(
      * @param errorMessage API error response for feedback message
      * @param retryListener Retry listener to fetch the course price again
      */
-    fun showUpgradeErrorDialog(
+    fun showPreUpgradeErrorDialog(
         context: Fragment,
         errorMessage: ErrorMessage = ErrorMessage(0, InAppPurchasesException()),
         retryListener: DialogInterface.OnClickListener? = null,

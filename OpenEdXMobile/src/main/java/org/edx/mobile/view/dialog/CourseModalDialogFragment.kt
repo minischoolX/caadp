@@ -24,6 +24,7 @@ import org.edx.mobile.util.AppConstants
 import org.edx.mobile.util.InAppPurchasesException
 import org.edx.mobile.util.NonNullObserver
 import org.edx.mobile.util.ResourceUtil
+import org.edx.mobile.util.observer.EventObserver
 import org.edx.mobile.viewModel.InAppPurchasesViewModel
 import org.edx.mobile.wrapper.InAppPurchasesDialog
 import javax.inject.Inject
@@ -137,11 +138,11 @@ class CourseModalDialogFragment : DialogFragment() {
     }
 
     private fun initIAPObservers() {
-        iapViewModel.productPrice.observe(viewLifecycleOwner, NonNullObserver { skuDetails ->
+        iapViewModel.productPrice.observe(viewLifecycleOwner, EventObserver { skuDetails ->
             setUpUpgradeButton(skuDetails)
         })
 
-        iapViewModel.showLoader.observe(viewLifecycleOwner, NonNullObserver {
+        iapViewModel.showLoader.observe(viewLifecycleOwner, EventObserver {
             enableUpgradeButton(!it)
         })
 
@@ -150,7 +151,7 @@ class CourseModalDialogFragment : DialogFragment() {
             iapViewModel.errorMessageShown()
         })
 
-        iapViewModel.productPurchased.observe(viewLifecycleOwner, NonNullObserver {
+        iapViewModel.productPurchased.observe(viewLifecycleOwner, EventObserver {
             lifecycleScope.launch {
                 iapViewModel.showFullScreenLoader(true)
                 dismiss()
@@ -181,7 +182,7 @@ class CourseModalDialogFragment : DialogFragment() {
                     userId = environment.loginPrefs.userId,
                     productId = it
                 )
-            } ?: iapDialog.showUpgradeErrorDialog(this)
+            } ?: iapDialog.showPreUpgradeErrorDialog(this)
         }
     }
 

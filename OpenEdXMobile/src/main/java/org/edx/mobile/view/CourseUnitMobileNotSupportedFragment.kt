@@ -23,12 +23,8 @@ import org.edx.mobile.module.analytics.Analytics
 import org.edx.mobile.module.analytics.Analytics.Events
 import org.edx.mobile.module.analytics.Analytics.Screens
 import org.edx.mobile.module.analytics.InAppPurchasesAnalytics
-import org.edx.mobile.util.AppConstants
-import org.edx.mobile.util.BrowserUtil
-import org.edx.mobile.util.InAppPurchasesException
-import org.edx.mobile.util.InAppPurchasesUtils
-import org.edx.mobile.util.NonNullObserver
-import org.edx.mobile.util.ResourceUtil
+import org.edx.mobile.util.*
+import org.edx.mobile.util.observer.EventObserver
 import org.edx.mobile.viewModel.InAppPurchasesViewModel
 import org.edx.mobile.wrapper.InAppPurchasesDialog
 import javax.inject.Inject
@@ -153,19 +149,18 @@ class CourseUnitMobileNotSupportedFragment : CourseUnitFragment() {
     }
 
     private fun initIAPObserver() {
-        iapViewModel.productPrice.observe(viewLifecycleOwner, NonNullObserver { skuDetails ->
+        iapViewModel.productPrice.observe(viewLifecycleOwner, EventObserver { skuDetails ->
             setUpUpgradeButton(skuDetails)
         })
-        iapViewModel.showLoader.observe(viewLifecycleOwner, NonNullObserver {
+        iapViewModel.showLoader.observe(viewLifecycleOwner, EventObserver {
             enableUpgradeButton(!it)
         })
 
-        iapViewModel.refreshCourseData.observe(viewLifecycleOwner) { refreshCourse: Boolean ->
+        iapViewModel.refreshCourseData.observe(viewLifecycleOwner, EventObserver { refreshCourse ->
             if (refreshCourse) {
-                iapViewModel.refreshCourseData(false)
                 unit?.let { updateCourseUnit(it.courseId, it.id) }
             }
-        }
+        })
 
         iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMessage ->
             // Error message observer should not observe EXECUTE or REFRESH error cases as they
@@ -177,7 +172,7 @@ class CourseUnitMobileNotSupportedFragment : CourseUnitFragment() {
             iapViewModel.errorMessageShown()
         })
 
-        iapViewModel.productPurchased.observe(viewLifecycleOwner, NonNullObserver {
+        iapViewModel.productPurchased.observe(viewLifecycleOwner, EventObserver {
             lifecycleScope.launch {
                 initializeBaseObserver()
                 iapViewModel.showFullScreenLoader(true)
@@ -235,7 +230,7 @@ class CourseUnitMobileNotSupportedFragment : CourseUnitFragment() {
                     environment.loginPrefs.userId,
                     productId
                 )
-            } ?: iapDialog.showUpgradeErrorDialog(this)
+            } ?: iapDialog.showPreUpgradeErrorDialog(this)
         }
     }
 

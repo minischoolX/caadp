@@ -1,5 +1,6 @@
 package org.edx.mobile.view
 
+import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,9 +22,12 @@ import org.edx.mobile.databinding.FragmentAccountBinding
 import org.edx.mobile.deeplink.Screen
 import org.edx.mobile.deeplink.ScreenDef
 import org.edx.mobile.event.AccountDataLoadedEvent
+import org.edx.mobile.event.MainDashboardRefreshEvent
 import org.edx.mobile.event.MediaStatusChangeEvent
 import org.edx.mobile.event.ProfilePhotoUpdatedEvent
+import org.edx.mobile.exception.ErrorMessage
 import org.edx.mobile.extenstion.setVisibility
+import org.edx.mobile.http.HttpStatus
 import org.edx.mobile.model.user.Account
 import org.edx.mobile.model.video.VideoQuality
 import org.edx.mobile.module.analytics.Analytics
@@ -32,6 +36,7 @@ import org.edx.mobile.module.prefs.PrefManager
 import org.edx.mobile.user.UserAPI.AccountDataUpdatedCallback
 import org.edx.mobile.user.UserService
 import org.edx.mobile.util.*
+import org.edx.mobile.util.observer.EventObserver
 import org.edx.mobile.view.dialog.*
 import org.edx.mobile.viewModel.CourseViewModel
 import org.edx.mobile.viewModel.InAppPurchasesViewModel
@@ -39,7 +44,9 @@ import org.edx.mobile.wrapper.InAppPurchasesDialog
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import retrofit2.Call
+import java.util.Timer
 import javax.inject.Inject
+import kotlin.concurrent.schedule
 
 @AndroidEntryPoint
 class AccountFragment : BaseFragment() {
@@ -62,7 +69,7 @@ class AccountFragment : BaseFragment() {
     lateinit var iapDialog: InAppPurchasesDialog
 
     private val courseViewModel: CourseViewModel by viewModels()
-    private val iapViewModel: InAppPurchasesViewModel by viewModels()
+    private val iapViewModel: InAppPurchasesViewModel by viewModels(ownerProducer = { requireActivity() })
 
     private var getAccountCall: Call<Account>? = null
     private var loaderDialog: AlertDialogFragment? = null
@@ -163,32 +170,64 @@ class AccountFragment : BaseFragment() {
                 )
             })
 
+        iapViewModel.refreshCourseData.observe(viewLifecycleOwner, EventObserver { refreshCourse ->
+            if (refreshCourse) {
+                resetPurchase()
+            }
+        })
+
         courseViewModel.handleError.observe(viewLifecycleOwner, NonNullObserver {
             dismissLoader(false)
         })
 
-        iapViewModel.purchaseFlowComplete.observe(
-            viewLifecycleOwner,
-            NonNullObserver { isPurchaseCompleted ->
-                if (isPurchaseCompleted) {
-                    dismissLoader(true)
-                }
-            })
+        iapViewModel.executeResponse.observe(viewLifecycleOwner, NonNullObserver {
+            dismissLoader(true)
+        })
 
-        iapViewModel.showFullscreenLoaderDialog.observe(
-            viewLifecycleOwner,
-            NonNullObserver { canShowLoader ->
-                if (canShowLoader) {
-                    val fullscreenLoader = FullscreenLoaderDialogFragment.newInstance()
-                    fullscreenLoader.show(childFragmentManager, FullscreenLoaderDialogFragment.TAG)
-                    iapViewModel.showFullScreenLoader(false)
-                }
-            })
-
-        iapViewModel.completedUnfulfilledPurchase.observe(viewLifecycleOwner) { isCompleted ->
+        iapViewModel.completedFakeUnfulfilledPurchase.observe(viewLifecycleOwner) { isCompleted ->
             if (isCompleted) {
                 dismissLoader(false)
                 iapDialog.showNoUnFulfilledPurchasesDialog(this)
+            }
+        }
+        iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMessage ->
+            dismissLoader(false)
+            var cancelListener: DialogInterface.OnClickListener? = null
+            if (errorMessage.isPostUpgradeErrorType()) {
+                cancelListener =
+                    DialogInterface.OnClickListener { _, _ -> iapViewModel.resetPurchase(true) }
+            }
+            iapDialog.handleIAPException(
+                fragment = this@AccountFragment,
+                errorMessage = errorMessage,
+                retryListener = { _, _ ->
+                    if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
+                        iapViewModel.executeOrder(requireActivity())
+                    } else if (HttpStatus.NOT_ACCEPTABLE == (errorMessage.throwable as InAppPurchasesException).httpErrorCode) {
+                        iapViewModel.upgradeMode = InAppPurchasesViewModel.UpgradeMode.SILENT
+                        val fullscreenLoader = FullscreenLoaderDialogFragment.newInstance()
+                        fullscreenLoader.show(
+                            childFragmentManager,
+                            FullscreenLoaderDialogFragment.TAG
+                        )
+                        iapViewModel.showFullScreenLoader(false)
+                    }
+                },
+                cancelListener = cancelListener
+            )
+        })
+    }
+
+    private fun resetPurchase() {
+        val fullscreenLoader =
+            childFragmentManager.findFragmentByTag(FullscreenLoaderDialogFragment.TAG) as FullscreenLoaderDialogFragment?
+        if (fullscreenLoader?.isAdded == true) {
+            Timer("", false).schedule(
+                fullscreenLoader.getRemainingVisibleTime()
+            ) {
+                iapViewModel.resetPurchase(true)
+                EventBus.getDefault().post(MainDashboardRefreshEvent())
+                requireActivity().finish()
             }
         }
     }

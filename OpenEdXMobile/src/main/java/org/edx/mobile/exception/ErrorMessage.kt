@@ -25,6 +25,12 @@ data class ErrorMessage(
         const val PRICE_CODE = 0x206
     }
 
+    fun isPreUpgradeErrorType(): Boolean = requestType == PRICE_CODE ||
+            requestType == ADD_TO_BASKET_CODE || requestType == CHECKOUT_CODE ||
+            requestType == PAYMENT_SDK_CODE
+
+    fun isPostUpgradeErrorType(): Boolean = !isPreUpgradeErrorType()
+
     fun getHttpErrorCode(): Int {
         if (throwable is InAppPurchasesException) {
             return throwable.httpErrorCode

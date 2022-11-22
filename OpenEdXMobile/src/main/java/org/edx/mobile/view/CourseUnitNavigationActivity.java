@@ -250,7 +250,7 @@ public class CourseUnitNavigationActivity extends CourseBaseActivity implements
     public void initializeIAPObserver() {
         iapViewModel = new ViewModelProvider(this).get(InAppPurchasesViewModel.class);
         iapViewModel.getShowFullscreenLoaderDialog().observe(this, canShowLoader -> {
-            if (canShowLoader) {
+            if (Boolean.TRUE.equals(canShowLoader.getContentIfNotConsumed())) {
                 fullScreenLoader.show(getSupportFragmentManager(), FullscreenLoaderDialogFragment.TAG);
                 iapViewModel.showFullScreenLoader(false);
             }
