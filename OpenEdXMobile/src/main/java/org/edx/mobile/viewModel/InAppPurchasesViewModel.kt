@@ -38,6 +38,9 @@ class InAppPurchasesViewModel @Inject constructor(
     private val _productPrice = MutableLiveData<Event<SkuDetails>>()
     val productPrice: LiveData<Event<SkuDetails>> = _productPrice
 
+    private val _launchPurchaseFlow = MutableLiveData<Any?>()
+    val launchPurchaseFlow: LiveData<Any?> = _launchPurchaseFlow
+
     private val _productPurchased = MutableLiveData<Event<Purchase>>()
     val productPurchased: LiveData<Event<Purchase>> = _productPurchased
 
@@ -53,8 +56,8 @@ class InAppPurchasesViewModel @Inject constructor(
     private val _refreshCourseData = MutableLiveData<Event<Boolean>>()
     val refreshCourseData: LiveData<Event<Boolean>> = _refreshCourseData
 
-    private val _completedFakeUnfulfilledPurchase = MutableLiveData<Boolean>()
-    val completedFakeUnfulfilledPurchase: LiveData<Boolean> = _completedFakeUnfulfilledPurchase
+    private val _fakeUnfulfilledCompletion = MutableLiveData<Boolean>()
+    val completedFakeUnfulfilledPurchase: LiveData<Boolean> = _fakeUnfulfilledCompletion
 
     private val _showLoader = MutableLiveData<Event<Boolean>>()
     val showLoader: LiveData<Event<Boolean>> = _showLoader
@@ -63,10 +66,7 @@ class InAppPurchasesViewModel @Inject constructor(
     val errorMessage: LiveData<ErrorMessage?> = _errorMessage
 
     var upgradeMode = UpgradeMode.NORMAL
-
-    private var _productId: String = ""
-    val productId: String
-        get() = _productId
+    var productId: String = ""
 
     private var _isVerificationPending = true
     val isVerificationPending: Boolean
@@ -75,7 +75,6 @@ class InAppPurchasesViewModel @Inject constructor(
     private var basketId: Long = 0
     private var purchaseToken: String = ""
     private var incompletePurchases: MutableList<Pair<String, String>> = arrayListOf()
-    private var userId: Long = 0
 
     private val listener = object : BillingProcessor.BillingFlowListeners {
         override fun onPurchaseCancel(responseCode: Int, message: String) {
@@ -125,16 +124,19 @@ class InAppPurchasesViewModel @Inject constructor(
         } ?: dispatchError(requestType = ErrorMessage.PRICE_CODE)
     }
 
-    fun addProductToBasket(activity: Activity, userId: Long, productId: String) {
-        this._productId = productId
-        this.userId = userId
+    fun startPurchaseFlow(productId: String) {
+        this.productId = productId
+        addProductToBasket(productId = productId)
+    }
+
+    private fun addProductToBasket(productId: String) {
         startLoading()
         repository.addToBasket(
             productId = productId,
             callback = object : NetworkResponseCallback<AddToBasketResponse> {
                 override fun onSuccess(result: Result.Success<AddToBasketResponse>) {
                     result.data?.let {
-                        proceedCheckout(activity, it.basketId)
+                        proceedCheckout(it.basketId)
                     } ?: endLoading()
                 }
 
@@ -148,7 +150,7 @@ class InAppPurchasesViewModel @Inject constructor(
             })
     }
 
-    fun proceedCheckout(activity: Activity, basketId: Long) {
+    fun proceedCheckout(basketId: Long) {
         this.basketId = basketId
         repository.proceedCheckout(
             basketId = basketId,
@@ -156,10 +158,10 @@ class InAppPurchasesViewModel @Inject constructor(
                 override fun onSuccess(result: Result.Success<CheckoutResponse>) {
                     result.data?.let {
                         if (upgradeMode.isSilentMode()) {
-                            executeOrder(activity)
+                            executeOrder()
                         } else {
                             iapAnalytics.initPaymentTime()
-                            billingProcessor.purchaseItem(activity, productId, userId)
+                            _launchPurchaseFlow.postValue(null)
                         }
                     } ?: endLoading()
                 }
@@ -174,7 +176,13 @@ class InAppPurchasesViewModel @Inject constructor(
             })
     }
 
-    fun executeOrder(activity: Activity) {
+    fun purchaseItem(activity: Activity, userId: Long, courseSku: String?) {
+        courseSku?.let {
+            billingProcessor.purchaseItem(activity, courseSku, userId)
+        }
+    }
+
+    fun executeOrder() {
         _isVerificationPending = false
         repository.executeOrder(
             basketId = basketId,
@@ -185,7 +193,7 @@ class InAppPurchasesViewModel @Inject constructor(
                     result.data?.let {
                         orderExecuted()
                         if (upgradeMode.isSilentMode()) {
-                            markPurchaseComplete(activity, it)
+                            markPurchaseComplete(it)
                         } else {
                             _executeResponse.postValue(it)
                             refreshCourseData(true)
@@ -204,17 +212,18 @@ class InAppPurchasesViewModel @Inject constructor(
             })
     }
 
-    fun detectUnfulfilledPurchase(
-        activity: Activity,
-        userId: Long,
-        enrolledCourses: List<EnrolledCoursesResponse>
-    ) {
+    /**
+     * To detect and handle courses which are purchased but still not Verified
+     *
+     * @param userId: id of the user to detect un full filled purchases and process.
+     * @return enrolledCourses user enrolled courses in the platform.
+     */
+    fun detectUnfulfilledPurchase(userId: Long, enrolledCourses: List<EnrolledCoursesResponse>) {
         val auditCoursesSku = enrolledCourses.getAuditCoursesSku()
         if (auditCoursesSku.isEmpty()) {
-            _completedFakeUnfulfilledPurchase.postValue(true)
+            _fakeUnfulfilledCompletion.postValue(true)
             return
         }
-        this.userId = userId
         billingProcessor.queryPurchase { _, purchases ->
             if (purchases.isEmpty()) {
                 return@queryPurchase
@@ -229,36 +238,33 @@ class InAppPurchasesViewModel @Inject constructor(
                     purchasesList
                 )
                 if (incompletePurchases.isEmpty()) {
-                    _completedFakeUnfulfilledPurchase.postValue(true)
+                    _fakeUnfulfilledCompletion.postValue(true)
                 } else {
-                    completePurchasesFlow(activity)
+                    startUnfulfilledVerification()
                 }
             } else {
-                _completedFakeUnfulfilledPurchase.postValue(true)
+                _fakeUnfulfilledCompletion.postValue(true)
             }
         }
     }
 
     /**
-     * To detect and handle courses which are purchased but still not Verified
-     *
-     * @param activity: context of the activity trigger to handle the incomplete purchases flow.
-     * @return incompletePurchases after dropout the verified one.
+     * Method to start the process to verify the un full filled courses skus
      */
-    private fun completePurchasesFlow(activity: Activity) {
+    private fun startUnfulfilledVerification() {
         viewModelScope.launch {
             upgradeMode = UpgradeMode.SILENT
             purchaseToken = incompletePurchases[0].second
-            addProductToBasket(activity, userId, incompletePurchases[0].first)
+            addProductToBasket(incompletePurchases[0].first)
         }
     }
 
-    private fun markPurchaseComplete(activity: Activity, result: ExecuteOrderResponse) {
+    private fun markPurchaseComplete(result: ExecuteOrderResponse) {
         incompletePurchases = incompletePurchases.drop(1).toMutableList()
         if (incompletePurchases.isEmpty()) {
             _executeResponse.postValue(result)
         } else {
-            completePurchasesFlow(activity)
+            startUnfulfilledVerification()
         }
     }
 
@@ -286,9 +292,8 @@ class InAppPurchasesViewModel @Inject constructor(
     }
 
     private fun orderExecuted() {
-        _productId = ""
+        productId = ""
         basketId = 0
-        userId = 0
     }
 
     fun errorMessageShown() {

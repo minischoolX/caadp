@@ -152,6 +152,15 @@ class CourseUnitMobileNotSupportedFragment : CourseUnitFragment() {
         iapViewModel.productPrice.observe(viewLifecycleOwner, EventObserver { skuDetails ->
             setUpUpgradeButton(skuDetails)
         })
+
+        iapViewModel.launchPurchaseFlow.observe(viewLifecycleOwner) {
+            iapViewModel.purchaseItem(
+                requireActivity(),
+                environment.loginPrefs.userId,
+                unit?.courseSku
+            )
+        }
+
         iapViewModel.showLoader.observe(viewLifecycleOwner, EventObserver {
             enableUpgradeButton(!it)
         })
@@ -225,11 +234,7 @@ class CourseUnitMobileNotSupportedFragment : CourseUnitFragment() {
         binding.layoutUpgradeBtn.btnUpgrade.setOnClickListener {
             iapAnalytics.trackIAPEvent(Events.IAP_UPGRADE_NOW_CLICKED)
             unit?.courseSku?.let { productId ->
-                iapViewModel.addProductToBasket(
-                    requireActivity(),
-                    environment.loginPrefs.userId,
-                    productId
-                )
+                iapViewModel.startPurchaseFlow(productId)
             } ?: iapDialog.showPreUpgradeErrorDialog(this)
         }
     }

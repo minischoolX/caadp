@@ -163,11 +163,7 @@ class AccountFragment : BaseFragment() {
         courseViewModel.enrolledCoursesResponse.observe(
             viewLifecycleOwner,
             NonNullObserver { enrolledCourses ->
-                iapViewModel.detectUnfulfilledPurchase(
-                    requireActivity(),
-                    loginPrefs.userId,
-                    enrolledCourses
-                )
+                iapViewModel.detectUnfulfilledPurchase(loginPrefs.userId, enrolledCourses)
             })
 
         iapViewModel.refreshCourseData.observe(viewLifecycleOwner, EventObserver { refreshCourse ->
@@ -202,7 +198,7 @@ class AccountFragment : BaseFragment() {
                 errorMessage = errorMessage,
                 retryListener = { _, _ ->
                     if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
-                        iapViewModel.executeOrder(requireActivity())
+                        iapViewModel.executeOrder()
                     } else if (HttpStatus.NOT_ACCEPTABLE == (errorMessage.throwable as InAppPurchasesException).httpErrorCode) {
                         iapViewModel.upgradeMode = InAppPurchasesViewModel.UpgradeMode.SILENT
                         val fullscreenLoader = FullscreenLoaderDialogFragment.newInstance()

@@ -69,7 +69,7 @@ class FullscreenLoaderDialogFragment : DialogFragment() {
         if (iapViewModel.upgradeMode.isSilentMode()) {
             iapViewModel.refreshCourseData(true)
         } else if (iapViewModel.isVerificationPending) {
-            iapViewModel.executeOrder(requireActivity())
+            iapViewModel.executeOrder()
         }
     }
 
@@ -91,7 +91,7 @@ class FullscreenLoaderDialogFragment : DialogFragment() {
                     errorMessage = errorMessage,
                     retryListener = { _, _ ->
                         if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
-                            iapViewModel.executeOrder(requireActivity())
+                            iapViewModel.executeOrder()
                         } else {
                             iapViewModel.refreshCourseData(true)
                         }

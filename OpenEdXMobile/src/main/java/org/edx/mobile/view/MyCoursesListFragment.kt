@@ -151,7 +151,6 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
                     initInAppPurchaseSetup()
                     resetPurchase()
                     iapViewModel.detectUnfulfilledPurchase(
-                        requireActivity(),
                         environment.loginPrefs.userId,
                         enrolledCourses
                     )
@@ -253,7 +252,7 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
                 errorMessage = errorMessage,
                 retryListener = { _, _ ->
                     if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
-                        iapViewModel.executeOrder(requireActivity())
+                        iapViewModel.executeOrder()
                     } else if (HttpStatus.NOT_ACCEPTABLE == (errorMessage.throwable as InAppPurchasesException).httpErrorCode) {
                         iapViewModel.showFullScreenLoader(true)
                     }
