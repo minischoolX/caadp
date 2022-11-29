@@ -21,13 +21,11 @@ import org.edx.mobile.core.IEdxEnvironment
 import org.edx.mobile.databinding.FragmentAccountBinding
 import org.edx.mobile.deeplink.Screen
 import org.edx.mobile.deeplink.ScreenDef
-import org.edx.mobile.event.AccountDataLoadedEvent
-import org.edx.mobile.event.MainDashboardRefreshEvent
-import org.edx.mobile.event.MediaStatusChangeEvent
-import org.edx.mobile.event.ProfilePhotoUpdatedEvent
+import org.edx.mobile.event.*
 import org.edx.mobile.exception.ErrorMessage
 import org.edx.mobile.extenstion.setVisibility
 import org.edx.mobile.http.HttpStatus
+import org.edx.mobile.model.iap.IAPFlowData
 import org.edx.mobile.model.user.Account
 import org.edx.mobile.model.video.VideoQuality
 import org.edx.mobile.module.analytics.Analytics
@@ -36,17 +34,15 @@ import org.edx.mobile.module.prefs.PrefManager
 import org.edx.mobile.user.UserAPI.AccountDataUpdatedCallback
 import org.edx.mobile.user.UserService
 import org.edx.mobile.util.*
-import org.edx.mobile.util.observer.EventObserver
 import org.edx.mobile.view.dialog.*
+import org.edx.mobile.view.dialog.FullscreenLoaderDialogFragment.Companion.newInstance
 import org.edx.mobile.viewModel.CourseViewModel
 import org.edx.mobile.viewModel.InAppPurchasesViewModel
 import org.edx.mobile.wrapper.InAppPurchasesDialog
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import retrofit2.Call
-import java.util.Timer
 import javax.inject.Inject
-import kotlin.concurrent.schedule
 
 @AndroidEntryPoint
 class AccountFragment : BaseFragment() {
@@ -69,7 +65,7 @@ class AccountFragment : BaseFragment() {
     lateinit var iapDialog: InAppPurchasesDialog
 
     private val courseViewModel: CourseViewModel by viewModels()
-    private val iapViewModel: InAppPurchasesViewModel by viewModels(ownerProducer = { requireActivity() })
+    private val iapViewModel: InAppPurchasesViewModel by viewModels()
 
     private var getAccountCall: Call<Account>? = null
     private var loaderDialog: AlertDialogFragment? = null
@@ -166,32 +162,31 @@ class AccountFragment : BaseFragment() {
                 iapViewModel.detectUnfulfilledPurchase(loginPrefs.userId, enrolledCourses)
             })
 
-        iapViewModel.refreshCourseData.observe(viewLifecycleOwner, EventObserver { refreshCourse ->
-            if (refreshCourse) {
-                resetPurchase()
-            }
-        })
-
         courseViewModel.handleError.observe(viewLifecycleOwner, NonNullObserver {
-            dismissLoader(false)
+            loaderDialog?.dismiss()
         })
 
-        iapViewModel.executeResponse.observe(viewLifecycleOwner, NonNullObserver {
-            dismissLoader(true)
+        iapViewModel.refreshCourseData.observe(viewLifecycleOwner, NonNullObserver {
+            iapDialog.showNewExperienceAlertDialog(this, { _, _ ->
+                loaderDialog?.dismiss()
+                showFullScreenLoader()
+            }, { _, _ ->
+                loaderDialog?.dismiss()
+            })
         })
 
-        iapViewModel.completedFakeUnfulfilledPurchase.observe(viewLifecycleOwner) { isCompleted ->
+        iapViewModel.fakeUnfulfilledCompletion.observe(viewLifecycleOwner) { isCompleted ->
             if (isCompleted) {
-                dismissLoader(false)
+                loaderDialog?.dismiss()
                 iapDialog.showNoUnFulfilledPurchasesDialog(this)
             }
         }
         iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMessage ->
-            dismissLoader(false)
+            loaderDialog?.dismiss()
             var cancelListener: DialogInterface.OnClickListener? = null
             if (errorMessage.isPostUpgradeErrorType()) {
                 cancelListener =
-                    DialogInterface.OnClickListener { _, _ -> iapViewModel.resetPurchase(true) }
+                    DialogInterface.OnClickListener { _, _ -> iapViewModel.iapFlowData.clear() }
             }
             iapDialog.handleIAPException(
                 fragment = this@AccountFragment,
@@ -200,13 +195,7 @@ class AccountFragment : BaseFragment() {
                     if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
                         iapViewModel.executeOrder()
                     } else if (HttpStatus.NOT_ACCEPTABLE == (errorMessage.throwable as InAppPurchasesException).httpErrorCode) {
-                        iapViewModel.upgradeMode = InAppPurchasesViewModel.UpgradeMode.SILENT
-                        val fullscreenLoader = FullscreenLoaderDialogFragment.newInstance()
-                        fullscreenLoader.show(
-                            childFragmentManager,
-                            FullscreenLoaderDialogFragment.TAG
-                        )
-                        iapViewModel.showFullScreenLoader(false)
+                        showFullScreenLoader()
                     }
                 },
                 cancelListener = cancelListener
@@ -214,18 +203,15 @@ class AccountFragment : BaseFragment() {
         })
     }
 
-    private fun resetPurchase() {
-        val fullscreenLoader =
+    private fun showFullScreenLoader() {
+        // To proceed with the same instance of dialog fragment in case of orientation change
+        var fullScreenLoader =
             childFragmentManager.findFragmentByTag(FullscreenLoaderDialogFragment.TAG) as FullscreenLoaderDialogFragment?
-        if (fullscreenLoader?.isAdded == true) {
-            Timer("", false).schedule(
-                fullscreenLoader.getRemainingVisibleTime()
-            ) {
-                iapViewModel.resetPurchase(true)
-                EventBus.getDefault().post(MainDashboardRefreshEvent())
-                requireActivity().finish()
-            }
+        if (fullScreenLoader == null) {
+            fullScreenLoader = newInstance()
         }
+        fullScreenLoader.setData(iapData = iapViewModel.iapFlowData)
+        fullScreenLoader.show(childFragmentManager, FullscreenLoaderDialogFragment.TAG)
     }
 
     private fun showLoader() {
@@ -235,17 +221,6 @@ class AccountFragment : BaseFragment() {
         )
         loaderDialog?.isCancelable = false
         loaderDialog?.showNow(childFragmentManager, null)
-    }
-
-    private fun dismissLoader(processedUnfulfilled: Boolean) {
-        loaderDialog?.dismiss()
-        if (processedUnfulfilled) {
-            iapDialog.showNewExperienceAlertDialog(this, { _, _ ->
-                iapViewModel.showFullScreenLoader(true)
-            }, { _, _ ->
-                dismissLoader(false)
-            })
-        }
     }
 
     private fun initVideoQuality() {
@@ -450,6 +425,15 @@ class AccountFragment : BaseFragment() {
         }
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)
+        }
+    }
+
+    @Subscribe
+    @SuppressWarnings("unused")
+    fun onEventMainThread(event: IAPFlowEvent) {
+        if (!this.isVisible && event.flowAction == IAPFlowData.IAPAction.PURCHASE_FLOW_COMPLETE) {
+            EventBus.getDefault().post(MainDashboardRefreshEvent())
+            requireActivity().finish()
         }
     }
 

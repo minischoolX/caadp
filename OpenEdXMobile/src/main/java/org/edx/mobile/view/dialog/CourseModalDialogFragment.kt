@@ -7,16 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.android.billingclient.api.SkuDetails
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import org.edx.mobile.R
 import org.edx.mobile.core.IEdxEnvironment
 import org.edx.mobile.databinding.DialogUpgradeFeaturesBinding
+import org.edx.mobile.event.IAPFlowEvent
 import org.edx.mobile.exception.ErrorMessage
 import org.edx.mobile.extenstion.setVisibility
 import org.edx.mobile.http.HttpStatus
+import org.edx.mobile.model.iap.IAPFlowData
 import org.edx.mobile.module.analytics.Analytics
 import org.edx.mobile.module.analytics.Analytics.Events
 import org.edx.mobile.module.analytics.InAppPurchasesAnalytics
@@ -27,6 +27,7 @@ import org.edx.mobile.util.ResourceUtil
 import org.edx.mobile.util.observer.EventObserver
 import org.edx.mobile.viewModel.InAppPurchasesViewModel
 import org.edx.mobile.wrapper.InAppPurchasesDialog
+import org.greenrobot.eventbus.EventBus
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -34,8 +35,7 @@ class CourseModalDialogFragment : DialogFragment() {
 
     private lateinit var binding: DialogUpgradeFeaturesBinding
 
-    private val iapViewModel: InAppPurchasesViewModel
-            by viewModels(ownerProducer = { requireActivity() })
+    private val iapViewModel: InAppPurchasesViewModel by viewModels()
 
     @Inject
     lateinit var environment: IEdxEnvironment
@@ -142,9 +142,9 @@ class CourseModalDialogFragment : DialogFragment() {
             setUpUpgradeButton(skuDetails)
         })
 
-        iapViewModel.launchPurchaseFlow.observe(viewLifecycleOwner) {
+        iapViewModel.launchPurchaseFlow.observe(viewLifecycleOwner, EventObserver {
             iapViewModel.purchaseItem(requireActivity(), environment.loginPrefs.userId, courseSku)
-        }
+        })
 
         iapViewModel.showLoader.observe(viewLifecycleOwner, EventObserver {
             enableUpgradeButton(!it)
@@ -152,14 +152,12 @@ class CourseModalDialogFragment : DialogFragment() {
 
         iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMessage ->
             handleIAPException(errorMessage)
-            iapViewModel.errorMessageShown()
         })
 
         iapViewModel.productPurchased.observe(viewLifecycleOwner, EventObserver {
-            lifecycleScope.launch {
-                iapViewModel.showFullScreenLoader(true)
-                dismiss()
-            }
+            EventBus.getDefault()
+                .post(IAPFlowEvent(IAPFlowData.IAPAction.SHOW_FULL_SCREEN_LOADER, it))
+            dismiss()
         })
     }
 
@@ -190,8 +188,16 @@ class CourseModalDialogFragment : DialogFragment() {
         var retryListener: DialogInterface.OnClickListener? = null
         if (HttpStatus.NOT_ACCEPTABLE == (errorMessage.throwable as InAppPurchasesException).httpErrorCode) {
             retryListener = DialogInterface.OnClickListener { _, _ ->
-                iapViewModel.upgradeMode = InAppPurchasesViewModel.UpgradeMode.SILENT
-                iapViewModel.showFullScreenLoader(true)
+                // already purchased course.
+                iapViewModel.iapFlowData.isVerificationPending = false
+                iapViewModel.iapFlowData.upgradeMode = IAPFlowData.UpgradeMode.SILENT
+                EventBus.getDefault()
+                    .post(
+                        IAPFlowEvent(
+                            IAPFlowData.IAPAction.SHOW_FULL_SCREEN_LOADER,
+                            iapFlowData = iapViewModel.iapFlowData
+                        )
+                    )
                 dismiss()
             }
         } else if (errorMessage.canRetry()) {

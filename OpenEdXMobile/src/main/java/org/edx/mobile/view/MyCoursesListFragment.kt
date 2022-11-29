@@ -17,10 +17,7 @@ import org.edx.mobile.databinding.PanelFindCourseBinding
 import org.edx.mobile.deeplink.DeepLink
 import org.edx.mobile.deeplink.DeepLinkManager
 import org.edx.mobile.deeplink.Screen
-import org.edx.mobile.event.EnrolledInCourseEvent
-import org.edx.mobile.event.MainDashboardRefreshEvent
-import org.edx.mobile.event.MoveToDiscoveryTabEvent
-import org.edx.mobile.event.NetworkConnectivityChangeEvent
+import org.edx.mobile.event.*
 import org.edx.mobile.exception.ErrorMessage
 import org.edx.mobile.extenstion.setVisibility
 import org.edx.mobile.http.HttpStatus
@@ -29,13 +26,13 @@ import org.edx.mobile.http.notifications.FullScreenErrorNotification
 import org.edx.mobile.http.notifications.SnackbarErrorNotification
 import org.edx.mobile.interfaces.RefreshListener
 import org.edx.mobile.model.api.EnrolledCoursesResponse
+import org.edx.mobile.model.iap.IAPFlowData
 import org.edx.mobile.module.analytics.Analytics
 import org.edx.mobile.module.analytics.InAppPurchasesAnalytics
 import org.edx.mobile.util.InAppPurchasesException
 import org.edx.mobile.util.NetworkUtil
 import org.edx.mobile.util.NonNullObserver
 import org.edx.mobile.util.UiUtils
-import org.edx.mobile.util.observer.EventObserver
 import org.edx.mobile.view.adapters.MyCoursesAdapter
 import org.edx.mobile.view.dialog.CourseModalDialogFragment
 import org.edx.mobile.view.dialog.FullscreenLoaderDialogFragment
@@ -45,9 +42,7 @@ import org.edx.mobile.viewModel.InAppPurchasesViewModel
 import org.edx.mobile.wrapper.InAppPurchasesDialog
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
-import java.util.Timer
 import javax.inject.Inject
-import kotlin.concurrent.schedule
 
 @AndroidEntryPoint
 class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
@@ -56,8 +51,7 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
     private lateinit var binding: FragmentMyCoursesListBinding
 
     private val courseViewModel: CourseViewModel by viewModels()
-    private val iapViewModel: InAppPurchasesViewModel
-            by viewModels(ownerProducer = { requireActivity() })
+    private val iapViewModel: InAppPurchasesViewModel by viewModels()
 
     @Inject
     lateinit var loginAPI: LoginAPI
@@ -71,7 +65,6 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
     private lateinit var errorNotification: FullScreenErrorNotification
     private var fullscreenLoader: FullscreenLoaderDialogFragment? = null
     private var refreshOnResume = false
-    private var refreshOnPurchase = false
     private var isObserversInitialized = true
     private var lastClickTime: Long = 0
 
@@ -149,7 +142,6 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
                 populateCourseData(data = enrolledCourses)
                 if (environment.appFeaturesPrefs.isIAPEnabled(environment.loginPrefs.isOddUserId)) {
                     initInAppPurchaseSetup()
-                    resetPurchase()
                     iapViewModel.detectUnfulfilledPurchase(
                         environment.loginPrefs.userId,
                         enrolledCourses
@@ -195,57 +187,16 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
     }
 
     private fun initIAPObservers() {
-        iapViewModel.executeResponse.observe(
-            viewLifecycleOwner,
-            NonNullObserver {
-                if (iapViewModel.upgradeMode.isSilentMode()) {
-                    iapDialog.showNewExperienceAlertDialog(this, { _, _ ->
-                        iapViewModel.showFullScreenLoader(true)
-                    }, { _, _ ->
-                        resetPurchase()
-                    })
-                }
-            })
-
-        iapViewModel.showFullscreenLoaderDialog.observe(
-            viewLifecycleOwner,
-            EventObserver { canShowLoader ->
-                if (canShowLoader) {
-                    fullscreenLoader?.show(childFragmentManager, FullscreenLoaderDialogFragment.TAG)
-                }
-            })
-
-        iapViewModel.refreshCourseData.observe(viewLifecycleOwner, EventObserver { refreshCourse ->
-            if (refreshCourse) {
-                refreshOnPurchase = true
-                courseViewModel.fetchEnrolledCourses(
-                    type = CoursesRequestType.LIVE,
-                    showProgress = false
-                )
-            }
+        iapViewModel.refreshCourseData.observe(viewLifecycleOwner, NonNullObserver { iapFlowData ->
+            iapDialog.showNewExperienceAlertDialog(this, { _, _ ->
+                showFullscreenLoader(iapFlowData)
+            }, { _, _ -> })
         })
-
-        iapViewModel.purchaseFlowComplete.observe(
-            viewLifecycleOwner,
-            NonNullObserver { isPurchaseCompleted ->
-                if (isPurchaseCompleted) {
-                    if (fullscreenLoader?.isAdded == true) fullscreenLoader?.dismiss()
-                    iapAnalytics.trackIAPEvent(Analytics.Events.IAP_COURSE_UPGRADE_SUCCESS)
-                    iapAnalytics.trackIAPEvent(Analytics.Events.IAP_UNLOCK_UPGRADED_CONTENT_TIME)
-                    iapAnalytics.trackIAPEvent(Analytics.Events.IAP_UNLOCK_UPGRADED_CONTENT_REFRESH_TIME)
-                    SnackbarErrorNotification(binding.root).showError(R.string.purchase_success_message)
-                    iapViewModel.resetPurchase(false)
-                }
-            })
-
         iapViewModel.errorMessage.observe(viewLifecycleOwner, NonNullObserver { errorMessage ->
-            if (iapViewModel.upgradeMode.isNormalMode()) {
-                return@NonNullObserver
-            }
             var cancelListener: DialogInterface.OnClickListener? = null
             if (errorMessage.isPostUpgradeErrorType().not()) {
                 cancelListener =
-                    DialogInterface.OnClickListener { _, _ -> iapViewModel.resetPurchase(true) }
+                    DialogInterface.OnClickListener { _, _ -> iapViewModel.iapFlowData.clear() }
             }
             iapDialog.handleIAPException(
                 fragment = this@MyCoursesListFragment,
@@ -253,13 +204,14 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
                 retryListener = { _, _ ->
                     if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
                         iapViewModel.executeOrder()
+                    } else if (errorMessage.requestType == ErrorMessage.EXECUTE_ORDER_CODE) {
+                        courseViewModel.fetchEnrolledCourses(type = CoursesRequestType.LIVE)
                     } else if (HttpStatus.NOT_ACCEPTABLE == (errorMessage.throwable as InAppPurchasesException).httpErrorCode) {
-                        iapViewModel.showFullScreenLoader(true)
+                        showFullscreenLoader(iapFlowData = iapViewModel.iapFlowData)
                     }
                 },
                 cancelListener = cancelListener
             )
-            iapViewModel.errorMessageShown()
         })
     }
 
@@ -287,11 +239,28 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
         refreshOnResume = true
     }
 
+    @Subscribe
+    fun onEventMainThread(event: IAPFlowEvent) {
+        if (!this.isVisible) {
+            return
+        }
+        when (event.flowAction) {
+            IAPFlowData.IAPAction.SHOW_FULL_SCREEN_LOADER -> {
+                event.iapFlowData?.let {
+                    showFullscreenLoader(event.iapFlowData)
+                }
+            }
+            IAPFlowData.IAPAction.PURCHASE_FLOW_COMPLETE -> {
+                SnackbarErrorNotification(binding.root).showError(R.string.purchase_success_message)
+                onRefresh()
+            }
+        }
+    }
+
     private fun initInAppPurchaseSetup() {
         if (isAdded && environment.appFeaturesPrefs.isValuePropEnabled() &&
             isObserversInitialized
         ) {
-            initFullscreenLoader()
             initIAPObservers()
             isObserversInitialized = false
         }
@@ -317,27 +286,15 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
         invalidateView()
     }
 
-    private fun initFullscreenLoader() {
+    private fun showFullscreenLoader(iapFlowData: IAPFlowData) {
         // To proceed with the same instance of dialog fragment in case of orientation change
         fullscreenLoader = try {
             childFragmentManager.findFragmentByTag(FullscreenLoaderDialogFragment.TAG) as FullscreenLoaderDialogFragment
         } catch (e: Exception) {
             FullscreenLoaderDialogFragment.newInstance()
         }
-    }
-
-    private fun resetPurchase() {
-        if (refreshOnPurchase && fullscreenLoader?.isAdded == true) {
-            Timer("", false).schedule(
-                fullscreenLoader?.getRemainingVisibleTime()
-                    ?: FullscreenLoaderDialogFragment.MINIMUM_DISPLAY_DELAY
-            ) {
-                refreshOnPurchase = false
-                iapViewModel.resetPurchase(true)
-            }
-        } else if (iapViewModel.upgradeMode.isSilentMode()) {
-            iapViewModel.resetPurchase(false)
-        }
+        fullscreenLoader?.setData(iapFlowData)
+        fullscreenLoader?.show(childFragmentManager, FullscreenLoaderDialogFragment.TAG)
     }
 
     private fun detectDeeplink() {
@@ -392,8 +349,8 @@ class MyCoursesListFragment : OfflineSupportBaseFragment(), RefreshListener {
     }
 
     @Subscribe(sticky = true)
-    fun onEvent(event: MainDashboardRefreshEvent?) {
-        courseViewModel.fetchEnrolledCourses(type = CoursesRequestType.STALE)
+    fun onEvent(event: MainDashboardRefreshEvent) {
+        courseViewModel.fetchEnrolledCourses(type = CoursesRequestType.LIVE)
     }
 
     override fun onRevisit() {
