@@ -1,223 +1,112 @@
 API_HOST_URL: 'https://olive.demo.overhang.io/'
-
 #API_URL_VERSION:
-
 #  BLOCKS: 'v2'
-
 #  REGISTRATION: 'v2'
-
 ENVIRONMENT_DISPLAY_NAME: ''
-
 PLATFORM_NAME: 'course'
-
 PHONETIC_PLATFORM_NAME: 'COURSE'
-
 PLATFORM_DESTINATION_NAME: 'course.co'
-
 FEEDBACK_EMAIL_ADDRESS: 'mobile-support@course.co'
-
 FAQ_URL: 'https://support.edx.org/hc/en-us/sections/4408224345879'
-
 DELETE_ACCOUNT_URL: 'https://account.edx.org/#delete-account'
-
 ECOMMERCE_URL: 'https://ecommerce.edx.org'
-
 DISCOVERY:
-
-  TYPE: native
-
+  TYPE: Native
 #  WEBVIEW:
-
 #    BASE_URL: 'https://olive.demo.overhang.io/courses?search'
-
 #    COURSE_DETAIL_TEMPLATE: 'https://www.edx.org/webview/course/{path_id}'
-
 #    PROGRAM_DETAIL_TEMPLATE: 'https://www.edx.org/webview/{path_id}'
-
 #PROGRAM:
-
 #  ENABLED: true
-
 #  PROGRAM_URL: 'https://courses.edx.org/dashboard/programs_fragment/?mobile_only=true'
-
 #  PROGRAM_DETAIL_URL_TEMPLATE: 'https://courses.edx.org/dashboard/{path_id}?mobile_only=true'
-
 YOUTUBE_PLAYER:
-
   ENABLED: true
-
   API_KEY: 'AIzaSyCyAXWx3UjvTtQt_3oU7d8j_nTOpDoZMS4'
-
 AGREEMENT_URLS:
-
   PRIVACY_POLICY_URL: 'https://www.edx.org/webview/edx-privacy-policy'
-
   TOS_URL: 'https://www.edx.org/webview/edx-terms-service'
-
   EULA_URL: 'https://www.edx.org/webview/eula'
-
   SUPPORTED_LANGUAGES:
-
   - 'es'
-
 ANNOUNCEMENTS_ENABLED: true
-
 BADGES_ENABLED: false
-
 CERTIFICATES_ENABLED: true
-
 COURSE_DATES_ENABLED: true
-
 COURSE_SHARING_ENABLED: true
-
 COURSE_VIDEOS_ENABLED: true
-
 DISCUSSIONS_ENABLED: true
-
 DISCUSSIONS_ENABLE_PROFILE_PICTURE_PARAM: true
-
 PUSH_NOTIFICATIONS: true
-
 NEW_LOGISTRATION_ENABLED: true
-
 REGISTRATION_ENABLED: true
-
 TAB_LAYOUTS_ENABLED: true
-
 USER_PROFILES_ENABLED: true
-
 VIDEO_TRANSCRIPT_ENABLED: true
-
 WHATS_NEW_ENABLED: true
-
 IAP_ENABLED: false
-
 #BRANCH:
-
 #  ENABLED: false
-
 #  KEY: 'key_live_kpxBY7wsvq7tp8eu5THJGlbauxdgC13u'
-
 #  SECRET: 'secret_live_i3HIF2fRHT6vUzORwS1XFQd0IH690KGg'
-
 #TWITTER:
-
 #  HASHTAG: "@edXOnline"
-
 FACEBOOK:
-
   ENABLED: true
-
   FACEBOOK_APP_ID: '1518363378406228'
-
 #SOCIAL_SHARING:
-
 #  ENABLED: false
-
 #  DISABLED_CARRIERS:
-
 #  - '63514'
-
 #ZERO_RATING:
-
 #  ENABLED: true
-
 #  CARRIERS:
-
 #  - '63514'
-
 #  WHITE_LIST_OF_DOMAINS:
-
 #  - 'courses.edx.org'
-
 #  - 'edx.org'
-
 #  - 'cdn.segment.io'
-
 #  - 'ssl.google-analytics.com'
-
 #  - 'api.segment.io'
-
 #  - 'e.crashyltics.com'
-
 #  - 'settings.crashlytics.com'
-
 #  - 'mobile-collector.newrelic.com'
-
 #  - 'www.google-analytics.com'
-
 #  - 'android.clients.google.com'
-
 #  - 'play.googleapis.com'
-
 #  - 'cdn.optimizely.com'
-
 #END_TO_END_TEST:
-
 #  EMAIL_TEMPLATE: 'edx-app-test-{unique_id}@simulator.amazonses.com'
-
 #SPEED_TEST_ENABLED: false
-
 FIREBASE:
-
   ENABLED: true
-
   ANALYTICS_SOURCE: 'firebase'
-
   CLOUD_MESSAGING_ENABLED: true
-
   PROJECT_NUMBER: '865480929089'
-
   PROJECT_ID: 'edxe-e65e4'
-
   OAUTH_CLIENT_ID: '865480929089-a7ur79jpk7ts2kgukfr0risor5dtbc9b.apps.googleusercontent.com'
-
   CURRENT_KEY: 'AIzaSyBSP3mxFkQgqGMGvyxMDdEOLBJkcIqQzA4'
-
   MOBILE_SDK_APP_ID: '1:865480929089:android:ff350c6dbfe9d3d005fbc0'
-
 #SEGMENT_IO:
-
 #  ENABLED: false
-
 #  SEGMENT_IO_WRITE_KEY: 'd3q35zMPdifpnVDPnnwmTukmfmyJVJh9'
-
-#GOOGLE:
-
-#  ENABLED: true
-
+GOOGLE:
+  ENABLED: true
 #MICROSOFT:
-
 #  ENABLED: true
-
 #  CLIENT_ID: '5ea2d1b0-1713-4069-a764-1be8f40a6210'
-
 #  SIGNATURE_HASH: 'ga0RGNYHvNM5d0SLGQfpQWAPGJ8='
-
 #  AUDIENCE_TYPE: 'AzureADMultipleOrgs'
-
 #  TENANT_ID: 'organizations'
-
 #BRAZE:
-
 #  ENABLED: false
-
 #  PUSH_NOTIFICATIONS_ENABLED: true
-
 #TEST_ACCOUNT:
-
 #  NAME: 'staff@example.com'
-
 #  PASSWORD: 'edx'
-
 OAUTH_CLIENT_ID: 'android'
-
 APP_UPDATE_URIS:
-
   - 'market://details?id={application_id}'
-
   - 'https://play.google.com/store/apps/details?id={application_id}'
-
 APP_REVIEWS_ENABLED: true
-
 DOWNLOAD_TO_SD_CARD_ENABLED: true
