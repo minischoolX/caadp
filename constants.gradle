@@ -1,5 +1,5 @@
 project.ext {
-    APPLICATION_ID = "org.edx.mobile"
+    APPLICATION_ID = "org.edx.mobilex"
     KOTLIN_VERSION = "1.6.10"
     GRADLE_PLUGIN_VERSION = "7.0.3"
     BUILD_TOOLS_VERSION = "30.0.2"
