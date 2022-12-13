@@ -1,4 +1,4 @@
-OfAPI_HOST_URL: 'https://coursery.co/'
+API_HOST_URL: 'https://coursery.co/'
 API_URL_VERSION:
   BLOCKS: 'v2'
   REGISTRATION: 'v2'
