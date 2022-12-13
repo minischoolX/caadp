@@ -1,4 +1,7 @@
-API_HOST_URL: 'https://coursery.co/'
+OfAPI_HOST_URL: 'https://coursery.co/'
+API_URL_VERSION:
+  BLOCKS: 'v2'
+  REGISTRATION: 'v2'
 ENVIRONMENT_DISPLAY_NAME: ''
 PLATFORM_NAME: 'coursery'
 PHONETIC_PLATFORM_NAME: 'COURSERY'
