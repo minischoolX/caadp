@@ -1,7 +1,4 @@
 API_HOST_URL: 'https://coursery.co/'
-#API_URL_VERSION:
-#  BLOCKS: 'v2'
-#  REGISTRATION: 'v2'
 ENVIRONMENT_DISPLAY_NAME: ''
 PLATFORM_NAME: 'coursery'
 PHONETIC_PLATFORM_NAME: 'COURSERY'
@@ -18,8 +15,6 @@ DISCOVERY:
     PROGRAM_DETAIL_TEMPLATE: 'https://coursery.co/{path_id}'
 PROGRAM:
   ENABLED: false
-#  PROGRAM_URL: 'https://courses.edx.org/dashboard/programs_fragment/?mobile_only=true'
-#  PROGRAM_DETAIL_URL_TEMPLATE: 'https://courses.edx.org/dashboard/{path_id}?mobile_only=true'
 YOUTUBE_PLAYER:
   ENABLED: true
   API_KEY: 'AIzaSyCyAXWx3UjvTtQt_3oU7d8j_nTOpDoZMS4'
@@ -45,39 +40,9 @@ USER_PROFILES_ENABLED: true
 VIDEO_TRANSCRIPT_ENABLED: true
 WHATS_NEW_ENABLED: true
 IAP_ENABLED: false
-#BRANCH:
-#  ENABLED: false
-#  KEY: 'key_live_kpxBY7wsvq7tp8eu5THJGlbauxdgC13u'
-#  SECRET: 'secret_live_i3HIF2fRHT6vUzORwS1XFQd0IH690KGg'
-#TWITTER:
-#  HASHTAG: "@edXOnline"
 FACEBOOK:
   ENABLED: true
   FACEBOOK_APP_ID: '1518363378406228'
-#SOCIAL_SHARING:
-#  ENABLED: false
-#  DISABLED_CARRIERS:
-#  - '63514'
-#ZERO_RATING:
-#  ENABLED: true
-#  CARRIERS:
-#  - '63514'
-#  WHITE_LIST_OF_DOMAINS:
-#  - 'courses.edx.org'
-#  - 'edx.org'
-#  - 'cdn.segment.io'
-#  - 'ssl.google-analytics.com'
-#  - 'api.segment.io'
-#  - 'e.crashyltics.com'
-#  - 'settings.crashlytics.com'
-#  - 'mobile-collector.newrelic.com'
-#  - 'www.google-analytics.com'
-#  - 'android.clients.google.com'
-#  - 'play.googleapis.com'
-#  - 'cdn.optimizely.com'
-#END_TO_END_TEST:
-#  EMAIL_TEMPLATE: 'edx-app-test-{unique_id}@simulator.amazonses.com'
-#SPEED_TEST_ENABLED: false
 FIREBASE:
   ENABLED: true
   ANALYTICS_SOURCE: 'firebase'
@@ -87,23 +52,8 @@ FIREBASE:
   OAUTH_CLIENT_ID: '865480929089-a7ur79jpk7ts2kgukfr0risor5dtbc9b.apps.googleusercontent.com'
   CURRENT_KEY: 'AIzaSyB4zlD57YG1OjzbbC9GJy4vXenNdA9WpJ4'
   MOBILE_SDK_APP_ID: '1:157808860388:android:ef5b2278980eeb7f3b20f1'
-#SEGMENT_IO:
-#  ENABLED: false
-#  SEGMENT_IO_WRITE_KEY: 'd3q35zMPdifpnVDPnnwmTukmfmyJVJh9'
 GOOGLE:
   ENABLED: true
-#MICROSOFT:
-#  ENABLED: true
-#  CLIENT_ID: '5ea2d1b0-1713-4069-a764-1be8f40a6210'
-#  SIGNATURE_HASH: 'ga0RGNYHvNM5d0SLGQfpQWAPGJ8='
-#  AUDIENCE_TYPE: 'AzureADMultipleOrgs'
-#  TENANT_ID: 'organizations'
-#BRAZE:
-#  ENABLED: false
-#  PUSH_NOTIFICATIONS_ENABLED: true
-#TEST_ACCOUNT:
-#  NAME: 'staff@example.com'
-#  PASSWORD: 'edx'
 OAUTH_CLIENT_ID: 'android'
 APP_UPDATE_URIS:
   - 'market://details?id={application_id}'
