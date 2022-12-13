@@ -14,10 +14,10 @@ DISCOVERY:
   TYPE: webview
   WEBVIEW:
     BASE_URL: 'https://coursery.co/courses?search'
-#    COURSE_DETAIL_TEMPLATE: 'https://www.edx.org/webview/course/{path_id}'
-#    PROGRAM_DETAIL_TEMPLATE: 'https://www.edx.org/webview/{path_id}'
-#PROGRAM:
-#  ENABLED: true
+    COURSE_DETAIL_TEMPLATE: 'https://coursery.co/course/{path_id}'
+    PROGRAM_DETAIL_TEMPLATE: 'https://coursery.co/{path_id}'
+PROGRAM:
+  ENABLED: false
 #  PROGRAM_URL: 'https://courses.edx.org/dashboard/programs_fragment/?mobile_only=true'
 #  PROGRAM_DETAIL_URL_TEMPLATE: 'https://courses.edx.org/dashboard/{path_id}?mobile_only=true'
 YOUTUBE_PLAYER:
