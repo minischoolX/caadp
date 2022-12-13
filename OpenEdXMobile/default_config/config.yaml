@@ -11,9 +11,9 @@ FAQ_URL: 'https://support.edx.org/hc/en-us/sections/4408224345879'
 DELETE_ACCOUNT_URL: 'https://account.edx.org/#delete-account'
 ECOMMERCE_URL: 'https://ecommerce.edx.org'
 DISCOVERY:
-  TYPE: Native
-#  WEBVIEW:
-#    BASE_URL: 'https://olive.demo.overhang.io/courses?search'
+  TYPE: webview
+  WEBVIEW:
+    BASE_URL: 'https://coursery.co/courses?search'
 #    COURSE_DETAIL_TEMPLATE: 'https://www.edx.org/webview/course/{path_id}'
 #    PROGRAM_DETAIL_TEMPLATE: 'https://www.edx.org/webview/{path_id}'
 #PROGRAM:
