@@ -43,6 +43,14 @@ USER_PROFILES_ENABLED: true
 VIDEO_TRANSCRIPT_ENABLED: true
 WHATS_NEW_ENABLED: true
 IAP_ENABLED: false
+ZERO_RATING:
+  ENABLED: true
+  CARRIERS:
+  - '63514'
+  WHITE_LIST_OF_DOMAINS:
+  - 'coursery.co'
+  - 'apps.coursery.co'
+  - 'crsry.github.io'
 FACEBOOK:
   ENABLED: true
   FACEBOOK_APP_ID: '1518363378406228'
