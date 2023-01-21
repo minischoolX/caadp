@@ -120,6 +120,7 @@ public class CourseUnitNavigationActivity extends CourseBaseActivity implements
         pagerAdapter = new CourseUnitPagerAdapter(this, environment,
                 unitList, courseData, courseUpgradeData, this);
         pager2.setAdapter(pagerAdapter);
+        pager2.setUserInputEnabled(false);
         pager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -130,10 +131,10 @@ public class CourseUnitNavigationActivity extends CourseBaseActivity implements
             public void onPageSelected(int position) {
                 if (pagerAdapter.getUnit(position).isMultiDevice()) {
                     // Disable ViewPager2 scrolling to enable horizontal scrolling to for the WebView (Specific HTML Components).
-                    List<BlockType> horizontalBlocks = Arrays.asList(
-                            BlockType.DRAG_AND_DROP_V2, BlockType.LTI_CONSUMER, BlockType.WORD_CLOUD);
-                    pager2.setUserInputEnabled(!horizontalBlocks
-                            .contains(pagerAdapter.getUnit(position).getType()));
+//                    List<BlockType> horizontalBlocks = Arrays.asList(
+//                            BlockType.DRAG_AND_DROP_V2, BlockType.LTI_CONSUMER, BlockType.WORD_CLOUD);
+//                    pager2.setUserInputEnabled(!horizontalBlocks
+//                            .contains(pagerAdapter.getUnit(position).getType()));
                 }
             }
 
