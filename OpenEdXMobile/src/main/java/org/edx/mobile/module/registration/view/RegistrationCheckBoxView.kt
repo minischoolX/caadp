@@ -36,7 +36,7 @@ class RegistrationCheckBoxView(
 
     override fun isValidInput(): Boolean = true
 
-    override fun setRawValue(value: String?): Boolean = false
+    override fun setRawValue(value: String?): Boolean = true
 
     override fun setInstructions(instructions: String?) {
     }
