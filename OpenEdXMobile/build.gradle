@@ -47,7 +47,7 @@ tasks.withType(Test) {
  * @return The semantic version string, or "0.0.1" if we failed to determine one.
  */
 def getVersionName = { ->
-    def description = "3.2.2"
+    def description = "0.0.1"
     try {
         def branch = System.getenv("BRANCH")
         if (null == branch || branch.isEmpty()) {
@@ -512,7 +512,7 @@ android {
             }
             applicationVariants.all { variant ->
                 variant.outputs.all { output ->
-                    project.ext { appName = 'edx' }
+                    project.ext { appName = 'Coursery' }
                     outputFileName  = "${project.ext.appName}-${variant.buildType.name}-${versionName}.apk"
                 }
             }
