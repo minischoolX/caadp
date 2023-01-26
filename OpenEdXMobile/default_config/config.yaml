@@ -1,13 +1,13 @@
 API_HOST_URL: 'https://coursery.co/'
 API_URL_VERSION: 
   REGISTRA: 'v1'
-ENVIRONMENT_DISPLAY_NAME: ''
-PLATFORM_NAME: 'coursery'
+ENVIRONMENT_DISPLAY_NAME: 'Coursery'
+PLATFORM_NAME: 'Coursery'
 PHONETIC_PLATFORM_NAME: 'COURSERY'
 PLATFORM_DESTINATION_NAME: 'coursery.co'
-FEEDBACK_EMAIL_ADDRESS: 'mobile-support@coursery.co'
-FAQ_URL: 'https://support.coursery.co/hc/en-us/sections/4408224345879'
-DELETE_ACCOUNT_URL: 'https://account.coursery.co/#delete-account'
+FEEDBACK_EMAIL_ADDRESS: 'feedback@coursery.co'
+#FAQ_URL: 'https://support.coursery.co/hc/en-us/sections/4408224345879'
+#DELETE_ACCOUNT_URL: 'https://account.coursery.co/#delete-account'
 ECOMMERCE_URL: 'https://ecommerce.coursery.co'
 DISCOVERY:
   TYPE: native
@@ -29,13 +29,13 @@ YOUTUBE_PLAYER:
 ANNOUNCEMENTS_ENABLED: true
 BADGES_ENABLED: false
 CERTIFICATES_ENABLED: true
-COURSE_DATES_ENABLED: true
+COURSE_DATES_ENABLED: false
 COURSE_SHARING_ENABLED: true
 COURSE_VIDEOS_ENABLED: true
 DISCUSSIONS_ENABLED: true
 DISCUSSIONS_ENABLE_PROFILE_PICTURE_PARAM: true
 PUSH_NOTIFICATIONS: true
-NEW_LOGISTRATION_ENABLED: true
+NEW_LOGISTRATION_ENABLED: false
 REGISTRATION_ENABLED: true
 TAB_LAYOUTS_ENABLED: true
 USER_PROFILES_ENABLED: true
@@ -43,7 +43,7 @@ VIDEO_TRANSCRIPT_ENABLED: true
 WHATS_NEW_ENABLED: true
 IAP_ENABLED: false
 FACEBOOK:
-  ENABLED: true
+  ENABLED: false
   FACEBOOK_APP_ID: '1518363378406228'
 FIREBASE:
   ENABLED: true
@@ -55,7 +55,7 @@ FIREBASE:
   CURRENT_KEY: 'AIzaSyB4zlD57YG1OjzbbC9GJy4vXenNdA9WpJ4'
   MOBILE_SDK_APP_ID: '1:157808860388:android:ef5b2278980eeb7f3b20f1'
 GOOGLE:
-  ENABLED: true
+  ENABLED: false
 OAUTH_CLIENT_ID: 'android'
 APP_UPDATE_URIS:
   - 'market://details?id={application_id}'
