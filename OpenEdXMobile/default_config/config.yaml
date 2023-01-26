@@ -6,26 +6,26 @@ PLATFORM_NAME: 'coursery'
 PHONETIC_PLATFORM_NAME: 'COURSERY'
 PLATFORM_DESTINATION_NAME: 'coursery.co'
 FEEDBACK_EMAIL_ADDRESS: 'mobile-support@coursery.co'
-FAQ_URL: 'https://support.edx.org/hc/en-us/sections/4408224345879'
-DELETE_ACCOUNT_URL: 'https://account.edx.org/#delete-account'
-ECOMMERCE_URL: 'https://ecommerce.edx.org'
+FAQ_URL: 'https://support.coursery.co/hc/en-us/sections/4408224345879'
+DELETE_ACCOUNT_URL: 'https://account.coursery.co/#delete-account'
+ECOMMERCE_URL: 'https://ecommerce.coursery.co'
 DISCOVERY:
-  TYPE: webview
-  WEBVIEW:
-    BASE_URL: 'https://coursery.co/courses?search'
-    COURSE_DETAIL_TEMPLATE: 'https://coursery.co/course/{path_id}'
-    PROGRAM_DETAIL_TEMPLATE: 'https://coursery.co/{path_id}'
+  TYPE: native
+  NATIVE:
+    SEARCH_ENABLED: false
+    SUBJECT_FILTER_ENABLED: false
+    SUBJECT_DISCOVERY_ENABLED: false
 PROGRAM:
   ENABLED: false
 YOUTUBE_PLAYER:
   ENABLED: true
   API_KEY: 'AIzaSyCyAXWx3UjvTtQt_3oU7d8j_nTOpDoZMS4'
-AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: 'https://www.edx.org/webview/edx-privacy-policy'
-  TOS_URL: 'https://www.edx.org/webview/edx-terms-service'
-  EULA_URL: 'https://www.edx.org/webview/eula'
-  SUPPORTED_LANGUAGES:
-  - 'es'
+#AGREEMENT_URLS:
+#  PRIVACY_POLICY_URL: 'https://www.edx.org/webview/edx-privacy-policy'
+#  TOS_URL: 'https://www.edx.org/webview/edx-terms-service'
+#  EULA_URL: 'https://www.edx.org/webview/eula'
+#  SUPPORTED_LANGUAGES:
+#  - 'es'
 ANNOUNCEMENTS_ENABLED: true
 BADGES_ENABLED: false
 CERTIFICATES_ENABLED: true
