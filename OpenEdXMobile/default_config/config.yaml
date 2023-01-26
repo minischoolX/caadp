@@ -1,6 +1,6 @@
 API_HOST_URL: 'https://coursery.co/'
-#API_URL_VERSION: 
-#  REGISTRA: 'v1'
+API_URL_VERSION: 
+  REGISTRA: 'v1'
 ENVIRONMENT_DISPLAY_NAME: ''
 PLATFORM_NAME: 'coursery'
 PHONETIC_PLATFORM_NAME: 'COURSERY'
@@ -10,11 +10,12 @@ FAQ_URL: 'https://support.coursery.co/hc/en-us/sections/4408224345879'
 DELETE_ACCOUNT_URL: 'https://account.coursery.co/#delete-account'
 ECOMMERCE_URL: 'https://ecommerce.coursery.co'
 DISCOVERY:
-  TYPE: native
-  NATIVE:
-    SEARCH_ENABLED: false
-    SUBJECT_FILTER_ENABLED: false
-    SUBJECT_DISCOVERY_ENABLED: false
+  COURSE:
+    TYPE: native
+    NATIVE:
+      SEARCH_ENABLED: false
+      SUBJECT_FILTER_ENABLED: false
+      SUBJECT_DISCOVERY_ENABLED: false
 PROGRAM:
   ENABLED: false
 YOUTUBE_PLAYER:
