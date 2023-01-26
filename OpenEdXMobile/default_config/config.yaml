@@ -10,12 +10,11 @@ FAQ_URL: 'https://support.coursery.co/hc/en-us/sections/4408224345879'
 DELETE_ACCOUNT_URL: 'https://account.coursery.co/#delete-account'
 ECOMMERCE_URL: 'https://ecommerce.coursery.co'
 DISCOVERY:
-  COURSE:
-    TYPE: native
-    NATIVE:
-      SEARCH_ENABLED: true
-      SUBJECT_FILTER_ENABLED: true
-      SUBJECT_DISCOVERY_ENABLED: true
+  TYPE: native
+  NATIVE:
+    SEARCH_ENABLED: true
+    SUBJECT_FILTER_ENABLED: true
+    SUBJECT_DISCOVERY_ENABLED: true
 PROGRAM:
   ENABLED: false
 YOUTUBE_PLAYER:
