@@ -223,8 +223,8 @@
 
     <!-- Logistration Launch screen -->
     <dimen name="logo_top_margin">90dp</dimen>
-    <dimen name="logo_height">160dp</dimen>
-    <dimen name="logo_width">280dp</dimen>
+    <dimen name="logo_height">140dp</dimen>
+    <dimen name="logo_width">245dp</dimen>
     <dimen name="search_layout_height">45dp</dimen>
 
     <!-- Auth Panel -->
