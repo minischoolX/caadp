@@ -45,7 +45,7 @@
                 android:id="@+id/row_title"
                 style="@style/regular_edx_black_text"
                 android:layout_width="wrap_content"
-                android:layout_height="24sp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_toEndOf="@+id/completed"
                 android:drawablePadding="@dimen/edx_half_margin"
