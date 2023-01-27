@@ -11,15 +11,11 @@ FEEDBACK_EMAIL_ADDRESS: 'feedback@coursery.co'
 #DELETE_ACCOUNT_URL: 'https://account.coursery.co/#delete-account'
 ECOMMERCE_URL: 'https://ecommerce.coursery.co'
 DISCOVERY:
-  TYPE: webview
-  WEBVIEW:
-    BASE_URL: 'https://coursery.co/courses?search'
-    COURSE_DETAIL_TEMPLATE: 'https://coursery.co/courses/{path_id}'
-#  TYPE: native
-#  NATIVE:
-#    SEARCH_ENABLED: true
-#    SUBJECT_FILTER_ENABLED: true
-#    SUBJECT_DISCOVERY_ENABLED: true
+  TYPE: native
+  NATIVE:
+    SEARCH_ENABLED: true
+    SUBJECT_FILTER_ENABLED: true
+    SUBJECT_DISCOVERY_ENABLED: true
 PROGRAM:
   ENABLED: false
 YOUTUBE_PLAYER:
