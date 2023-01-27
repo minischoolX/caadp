@@ -68,7 +68,7 @@ object CourseDateUtil {
                 biValue = Analytics.Values.COURSE_DATES_BANNER_INFO
                 bannerTypeValue = Analytics.Values.PLS_BANNER_TYPE_INFO
             }
-            CourseBannerType.BLANK -> view.visibility = View.VISIBLE
+            CourseBannerType.BLANK -> view.visibility = View.GONE
         }
 
         if (!TextUtils.isEmpty(bannerMessage.text) && (isSelfPaced || (isSelfPaced.not() && bannerType == CourseBannerType.UPGRADE_TO_GRADED))) {
@@ -84,7 +84,7 @@ object CourseDateUtil {
                 button.visibility = View.GONE
                 imgView.visibility = View.GONE
             }
-            view.visibility = View.GONE
+            view.visibility = View.VISIBLE
             analyticsRegistry.trackPLSCourseDatesBanner(biValue, courseId, enrollmentMode, screenName, bannerTypeValue)
         } else {
             view.visibility = View.GONE
