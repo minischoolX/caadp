@@ -84,7 +84,7 @@ object CourseDateUtil {
                 button.visibility = View.GONE
                 imgView.visibility = View.GONE
             }
-            view.visibility = View.VISIBLE
+            view.visibility = View.GONE
             analyticsRegistry.trackPLSCourseDatesBanner(biValue, courseId, enrollmentMode, screenName, bannerTypeValue)
         } else {
             view.visibility = View.GONE
