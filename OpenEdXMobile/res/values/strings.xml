@@ -525,10 +525,12 @@
     <string name="launch_login">Sign In</string>
     <!-- Introduction text on the launch screen -->
     <!-- <string name="launch_text">Courses from the world\'s best universities in your pocket.</string>  -->
-    <string name="launch_text">Welcome to Coursery e-Learning application.\n\n Log in or Register to learn English with ease. </string>
+    <string name="launch_text">Courses</string>
+    <!-- <string name="launch_text">Welcome to Coursery e-Learning application.\n\nLog in or Register to learn English with ease. </string> -->
     <!-- Introduction text on the launch screen when courses and program enabled  -->
     <!-- <string name="launch_text_courses_and_program">Courses and programs from the world\'s best universities in your pocket.</string>  -->
-    <string name="launch_text_courses_and_program">Welcome to Coursery e-Learning application.\n\n Log in or Register to learn English with ease.</string>
+    <string name="launch_text_courses_and_program">Courses and programs from the world\'s best universities in your pocket.</string>
+    <!-- <string name="launch_text_courses_and_program">Welcome to Coursery e-Learning application.\n\nLog in or Register to learn English with ease.</string> -->
     <!-- Search View title on the launch screen -->
     <string name="launch_search_title">What do you want to learn?</string>
     <!-- Search view leading user to Find Courses screen from the launch screen upon searching some text -->
