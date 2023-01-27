@@ -68,7 +68,7 @@ object CourseDateUtil {
                 biValue = Analytics.Values.COURSE_DATES_BANNER_INFO
                 bannerTypeValue = Analytics.Values.PLS_BANNER_TYPE_INFO
             }
-            CourseBannerType.BLANK -> view.visibility = View.GONE
+            CourseBannerType.BLANK -> view.visibility = View.VISIBLE
         }
 
         if (!TextUtils.isEmpty(bannerMessage.text) && (isSelfPaced || (isSelfPaced.not() && bannerType == CourseBannerType.UPGRADE_TO_GRADED))) {
