@@ -1,4 +1,4 @@
-API_HOST_URL: 'https://coursery.co/'
+API_HOST_URL: 'https://apps.coursery.co/'
 API_URL_VERSION: 
   REGISTRA: 'v1'
 ENVIRONMENT_DISPLAY_NAME: 'Coursery'
