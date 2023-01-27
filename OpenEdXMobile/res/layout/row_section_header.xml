@@ -8,7 +8,7 @@
         android:id="@+id/row_header"
         style="@style/regular_grey_text"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="75dp"
         android:fontFamily="?attr/fontSemiBold"
         android:gravity="center_vertical|start"
         android:paddingStart="@dimen/course_section_header_margin"
