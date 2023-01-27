@@ -32,10 +32,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/widget_margin_double"
-                android:fontFamily="?attr/fontRegular"
+                android:fontFamily="?attr/fontSemiBold"
                 android:text="@string/launch_text"
                 android:textColor="@color/primaryBaseColor"
-                android:textSize="@dimen/edx_large" />
+                android:textSize="@dimen/edx_x_large" />
 
             <TextView
                 android:id="@+id/tv_search_title"
