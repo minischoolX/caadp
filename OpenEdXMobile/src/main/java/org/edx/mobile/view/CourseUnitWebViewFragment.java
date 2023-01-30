@@ -165,7 +165,7 @@ public class CourseUnitWebViewFragment extends CourseUnitFragment {
     private void evaluateXBlocksForBanner() {
         List<BlockType> notPermittedBlocks = Arrays.asList(BlockType.DISCUSSION, BlockType.HTML, BlockType.VIDEO);
         if (!notPermittedBlocks.contains(unit.getType())) {
-            setupOpenInBrowserView();
+//            setupOpenInBrowserView();
         }
     }
 
@@ -182,7 +182,7 @@ public class CourseUnitWebViewFragment extends CourseUnitFragment {
             binding.authWebview.evaluateJavascript(javascript, value -> {
                 evaluatediFrameJS = true;
                 if (Boolean.parseBoolean(value)) {
-                    setupOpenInBrowserView();
+//                    setupOpenInBrowserView();
                 }
             });
         }
