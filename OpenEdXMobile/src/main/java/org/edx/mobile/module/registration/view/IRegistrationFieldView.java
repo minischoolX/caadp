@@ -79,7 +79,8 @@ public interface IRegistrationFieldView {
             }
             else if (fieldType.equals(RegistrationFieldType.CHECKBOX)) {
                 View view = inflater.inflate(R.layout.view_register_checkbox, null);
-                return new RegistrationCheckBoxView(field, view);
+      //          return new RegistrationCheckBoxView(field, view);
+                return null;
             } else {
                 logger.error(new Exception(
                         String.format("Unknown field type found for field named: %s in RegistrationDescription, skipping it!",
